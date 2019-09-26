@@ -1,6 +1,10 @@
 # simpleMap
 small untility to convert a geoJSON array to X,Y coordinates on an HTML Canvas
 
+# Usage
+ <div class="chartContainer">
+ </div>
+
 # author
 JC Durbin
 
