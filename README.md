@@ -1,11 +1,10 @@
 # simpleMap
 small untility to convert a geoJSON array to X,Y coordinates on an HTML Canvas
 
-# Usage
 
+## Simple Example
 ### HTML
 Create container element to hold the canvas element that will be created by the class
-
     <div id="chartContainer">
     </div>
     
@@ -15,12 +14,15 @@ Create container element to hold the canvas element that will be created by the 
         containerName: 'chartContainer',
         itemName: 'chartCanvas',
     });
-
 #### Create and attach canvas to element
     newMap.buildMap();
 
 #### Add data
     newMap.drawPath(data);
+    
+## Configuration
+
+## Usage
     
 
 # author
