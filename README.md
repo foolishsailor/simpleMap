@@ -23,8 +23,8 @@ Create container element to hold the canvas element that will be created by the 
     
 ## Configuration
     new simpleMap({
-                    containerName,              //Id of parent element - required
-                    itemName = "mapCanvas",     //Id of canvas element to be created - required 
+                    containerName,              //Id of parent element - Default: 'mapContainer'
+                    itemName = "mapCanvas",     //Id of canvas element to be created - Default: 'mapCanvas'
                     height,                     //Height of canvas - Default: 100px                    
                     width,                      //Width of canvas - Default: 100px
                     padding = 10,               //Padding around drawn path and edges of canvas - Default: 10 (px)
