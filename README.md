@@ -1,2 +1,10 @@
 # simpleMap
-Simple geoJSON to HTML Canvas to draw images and paths using GEOJSON arrays
+small untility to convert a geoJSON array to X,Y coordinates on an HTML Canvas
+
+# author
+JC Durbin
+
+#License
+Copyright (c) 2019  JC Durbin
+
+Released under the MIT license. See LICENSE for details.
