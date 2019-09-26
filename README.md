@@ -1,5 +1,5 @@
 # simpleMap
-small untility to convert a geoJSON array to X,Y coordinates on an HTML Canvas
+small utility to convert a geoJSON array to X,Y coordinates on an HTML Canvas
 
 
 ## Simple Example
