@@ -5,6 +5,7 @@ small untility to convert a geoJSON array to X,Y coordinates on an HTML Canvas
 ## Simple Example
 ### HTML
 Create container element to hold the canvas element that will be created by the class
+
     <div id="chartContainer">
     </div>
     
