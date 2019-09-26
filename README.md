@@ -2,8 +2,14 @@
 small untility to convert a geoJSON array to X,Y coordinates on an HTML Canvas
 
 # Usage
+
+### HTML
     <div class="chartContainer">
     </div>
+    
+### Javascript
+    let newMap = new simpleMap({
+    });
 
 # author
 JC Durbin
