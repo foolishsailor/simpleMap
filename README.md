@@ -34,9 +34,34 @@ Create container element to hold the canvas element that will be created by the 
                     resize = false              //Resize the canvas element to fit drawn path and padding - Default: false
                   })
 
-## Additional Functions
-###
+## Functions
+### buildMap()
+Creates canvas element and assigns the id = itemName and inserts it as a child to the containerName element 
+
+### drawPath([data])
+Takes and array of objects with Lat/Lon in Decimal format  
+  #### Data Format
+    [
+        {
+            Lat: -32.43434
+            Lon: 4.51234
+        },
+        {
+            Lat: -34.44536 
+            Lon: 6.11234
+        },
+        {
+            Lat: -32.8766 
+            Lon: 8.11234
+        }
+    ]
     
+### eraseMap()
+Clears the canvas of any paths drawn on it
+
+### removeCanvas()
+Removes the canvas element entirely from the parent container
+
 
 # author
 JC Durbin
