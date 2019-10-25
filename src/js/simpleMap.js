@@ -1,4 +1,8 @@
-const SimpleMap = function({
+import {geoUtils} from './geoUtils.js';
+import {mapUtils} from './mapUtils.js';
+
+
+export const SimpleMap = function({
   containerName = "mapContainer",
   height = 100,
   width = 100,
@@ -16,7 +20,7 @@ const SimpleMap = function({
       timeLineContainerBounds,
       pathCanvas = document.createElement("canvas"),
       overlayCanvas = document.createElement("canvas"),
-      overlayContext = overlayCanvas.getContext("2d");
+      overlayContext = overlayCanvas.getContext("2d"),
       pathContext = pathCanvas.getContext("2d");
       this.points = [];
 
@@ -56,30 +60,12 @@ const SimpleMap = function({
 
  };
 
- /**
-   * Draw draggable timeline
-   */
-
-  const drawTimeline = () => {
-    //container;
-    timeLineContainerBounds  = {
-      x: 10,
-      y: pathContext.canvas.height - 60,
-      width: pathContext.canvas.width - 20,
-      height: 50
-    };
-
-    timeLineContainer = new RectObj(timeLineContainerBounds.x, timeLineContainerBounds.y, timeLineContainerBounds.width, timeLineContainerBounds.height, pathWidth, pathColor);
-    timeLineContainer.draw(pathContext);
-        
-  };
-
-  
+ 
 
   const handleMouseDown = (e) =>{    
     if (timeLineContainer.contains(e.clientX-canvasBounds.left, e.clientY-canvasBounds.top)) mouseDown = true;
     startTimeIndicator = e.clientX-canvasBounds.left-timeLineContainerBounds.x;
-    this.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
+    mapUtils.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
   }
 
   const handleMouseUp = () =>{
@@ -96,8 +82,8 @@ const SimpleMap = function({
       let index = Math.floor(this.points.length * (e.clientX-canvasBounds.left)/timeLineContainerBounds.width);
 
       startTimeIndicator = e.clientX-canvasBounds.left-timeLineContainerBounds.x;
-      this.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
-      this.drawPathHighlight(overlayContext, this.points[index]);
+      mapUtils.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
+      mapUtils.drawPathHighlight(overlayContext, this.points[index]);
    }  
 
   }
@@ -125,6 +111,13 @@ const SimpleMap = function({
     overlayContext.canvas.width = width;
 
     canvasBounds = pathContext.canvas.getBoundingClientRect();
+
+    timeLineContainerBounds  = {
+      x: 10,
+      y: overlayContext.canvas.height - 60,
+      width: overlayContext.canvas.width - 20,
+      height: 50
+    };
 
     //attache mouse event listeners
     overlayContext.canvas.onmousedown = handleMouseDown;
@@ -161,8 +154,9 @@ const SimpleMap = function({
   this.draw = () => {
     pathContext.clearRect(0,0,pathCanvas.width,pathCanvas.height);
     drawPath();
-    drawTimeline();
-    this.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
+    
+    timeLineContainer = mapUtils.drawTimeline(pathContext, timeLineContainerBounds, pathWidth, pathColor);
+    mapUtils.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
   }
 
 
@@ -191,89 +185,8 @@ const SimpleMap = function({
 
 
 
-/**
- * Draw highlight on course in sync with timeline position
- */
-SimpleMap.prototype.drawPathHighlight = (ctx, record) => {
-  console.log(ctx,0, 0, ctx.canvas.width, ctx.canvas.height)
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-  ctx.beginPath();
-  ctx.fillStyle = 'red';
-  ctx.arc(record.x,record.y,5,0,2*Math.PI);
-  ctx.fill();
-}
-
-/**
- * Draw timline indicator
- */
-SimpleMap.prototype.drawStartIndicator = (ctx, position, tlc) =>{
-
-  position = position || 10;
-
-  //startIndicator
-  ctx.clearRect(tlc.x, tlc.y, tlc.width, tlc.height);
-  
-  ctx.beginPath();
-
-  ctx.fillStyle = 'rgba(0,0,0,0.2)';
-  //background
-  ctx.fillRect(tlc.x+position, tlc.y+1, 11, tlc.height-2);
-
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = '#666';
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-
-  //top indicator
-  ctx.moveTo(tlc.x+6+position, tlc.y+10);
-  ctx.lineTo(tlc.x+position, tlc.y+7);
-  ctx.lineTo(tlc.x+position, tlc.y+1);
-  ctx.lineTo(tlc.x+11+position, tlc.y+1);
-  ctx.lineTo(tlc.x+11+position, tlc.y+7);
-  ctx.lineTo(tlc.x+6+position, tlc.y+10);
-
-  //top indicator
-  ctx.moveTo(tlc.x+6+position, tlc.y+tlc.height-10);
-  ctx.lineTo(tlc.x+position, tlc.y+tlc.height-7);
-  ctx.lineTo(tlc.x+position, tlc.y+tlc.height-1);
-  ctx.lineTo(tlc.x+11+position, tlc.y+tlc.height-1);
-  ctx.lineTo(tlc.x+11+position, tlc.y+tlc.height-7);
-  ctx.lineTo(tlc.x+6+position, tlc.y+tlc.height-10);
-
-  ctx.fill();
-
-  //time indicator
-  ctx.beginPath();
-  ctx.strokeStyle= 'red';
-  ctx.moveTo(tlc.x+6+position, tlc.y+11);
-  ctx.lineTo(tlc.x+6+position, tlc.y+tlc.height-11);
-
-  ctx.stroke();
-}
 
 
-/**
- * Creates rectangle object to track mouse 
- */
-class RectObj {
-  constructor(x, y, w, h, stroke, strokeColor){
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
-    this.stroke = stroke;
-    this.strokeColor = strokeColor;
-  }  
 
-  contains(x, y) {
-    return this.x <= x && x <= this.x + this.width &&
-             this.y <= y && y <= this.y + this.height;
-  }
 
-  draw(ctx) {
-      ctx.strokeStyle = this.strokeColor;
-      ctx.lineWidth = this.stroke;
-      ctx.rect(this.x, this.y, this.width, this.height);
-      ctx.stroke();
-  }
-}
+
