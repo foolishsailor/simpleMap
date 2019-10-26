@@ -1,20 +1,30 @@
 export class RectObj {
-  constructor(x, y, w, h, stroke, strokeColor) {
+  constructor({x, y, w, h, clickPad}) {
     this.x = x;
     this.y = y;
     this.width = w;
     this.height = h;
-    this.stroke = stroke;
-    this.strokeColor = strokeColor;
+    this.clickPad = clickPad || 0;
+    
   }
 
   contains(x, y) {
     return (
-      this.x <= x &&
-      x <= this.x + this.width &&
-      this.y <= y &&
-      y <= this.y + this.height
+      this.x - this.clickPad <= x &&
+      x <= this.x + this.width + this.clickPad &&
+      this.y - this.clickPad <= y &&
+      y <= this.y + this.height + this.clickPad
     );
+  }
+
+  
+}
+
+export class Indicator extends RectObj {
+  constructor({x, y, w, h, stroke, strokeColor, clickPad}){
+    super({x, y, w, h, clickPad});
+    this.stroke = stroke;
+    this.strokeColor = strokeColor;
   }
 
   draw(ctx) {
@@ -23,4 +33,5 @@ export class RectObj {
     ctx.rect(this.x, this.y, this.width, this.height);
     ctx.stroke();
   }
+
 }

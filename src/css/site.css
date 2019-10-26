@@ -1,9 +1,9 @@
 .mapContainer{
     position: relative;
     margin: auto;
-    width: 500px;
+    width: 700px;
     height: 500px;
-    background: blue;
+    background: hsl(207, 61%, 20%);
 }
 
 canvas { position: absolute; }

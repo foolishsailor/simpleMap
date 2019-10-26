@@ -1,6 +1,6 @@
 import {geoUtils} from './geoUtils.js';
-import {mapUtils} from './mapUtils.js';
-
+import {Timeline} from './timeline.js';
+import {PathObj} from './pathObj.js';
 
 export const SimpleMap = function({
   containerName = "mapContainer",
@@ -15,57 +15,19 @@ export const SimpleMap = function({
   var mouseDown = false,
       startTimeIndicator = 0,
       endTimeIndicator = 0,
+      timelineIndicator = 0,
       canvasBounds,
-      timeLineContainer,
-      timeLineContainerBounds,
+      timeline,     
       pathCanvas = document.createElement("canvas"),
       overlayCanvas = document.createElement("canvas"),
       overlayContext = overlayCanvas.getContext("2d"),
-      pathContext = pathCanvas.getContext("2d");
-      this.points = [];
+      pathContext = pathCanvas.getContext("2d"),
+      path;
 
-  //Draw path on map
-  const drawPath = () =>{
-    //get new size for map
-    if (resize) {
-     pathContext.canvas.height = Math.max(...this.points.map(e => e.y)) + padding;
-     pathContext.canvas.width = Math.max(...this.points.map(e => e.x)) + padding;
-     canvasBounds = pathContext.canvas.getBoundingClientRect();
-     
-   }
-
-   //background color or transparent
-   if (typeof backgroundColor != "undefined") {
-     pathContext.fillStyle = backgroundColor;
-     pathContext.fillRect(0, 0, pathContext.canvas.width, pathContext.canvas.height);
-   }
-
-   //draw map
-   for (var j = 0; j < this.points.length; j++) {
-     // If this is the first coordinate in a shape, start a new path
-     if (j === 0) {
-       pathContext.beginPath();
-       pathContext.strokeStyle = pathColor;
-       pathContext.lineWidth = pathWidth;
-       pathContext.moveTo(this.points[j].x, this.points[j].y);
-
-       // Otherwise just keep drawing
-     } else {
-       pathContext.lineTo(this.points[j].x, this.points[j].y);
-     }
-     
-   }
-
-   pathContext.stroke();
-
- };
-
- 
 
   const handleMouseDown = (e) =>{    
-    if (timeLineContainer.contains(e.clientX-canvasBounds.left, e.clientY-canvasBounds.top)) mouseDown = true;
-    startTimeIndicator = e.clientX-canvasBounds.left-timeLineContainerBounds.x;
-    mapUtils.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
+    mouseDown = true;
+    timeline.currentPosition = e.clientX-canvasBounds.left;
   }
 
   const handleMouseUp = () =>{
@@ -74,17 +36,16 @@ export const SimpleMap = function({
   }
 
   const handleMouseOut = () =>{
+    mouseDown = false;
     console.log('Mouse Out')
   }
 
   const handleMouseMove = (e) =>{ 
-    if (mouseDown){
-      let index = Math.floor(this.points.length * (e.clientX-canvasBounds.left)/timeLineContainerBounds.width);
-
-      startTimeIndicator = e.clientX-canvasBounds.left-timeLineContainerBounds.x;
-      mapUtils.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
-      mapUtils.drawPathHighlight(overlayContext, this.points[index]);
-   }  
+    if (mouseDown && e.clientX-canvasBounds.left >= timeline.bounds.x && e.clientX-canvasBounds.left <= timeline.bounds.width){
+      //calc didstance to left or right as percentage of width to get the index of the path objects in path
+      let index = Math.floor(path.points.length * (e.clientX-canvasBounds.left)/timeline.bounds.width);
+      timeline.updatePosition(e.clientX-canvasBounds.left, path.points[index]);
+    }
 
   }
 
@@ -99,7 +60,6 @@ export const SimpleMap = function({
     pathCanvas.setAttribute('z-index', 1);
     overlayCanvas.id ='overlayCanvas';
     overlayCanvas.setAttribute('z-index', 0);
-
     
     document.getElementById(containerName).appendChild(pathCanvas);
     document.getElementById(containerName).appendChild(overlayCanvas);
@@ -107,17 +67,28 @@ export const SimpleMap = function({
     pathContext.canvas.height = height;
     pathContext.canvas.width = width;
 
+    //background color or transparent
+    if (typeof backgroundColor != "undefined") {
+      pathContext.fillStyle = backgroundColor;
+      pathContext.fillRect(0, 0, pathContext.canvas.width, pathContext.canvas.height);
+    }
+
     overlayContext.canvas.height = height;
     overlayContext.canvas.width = width;
 
     canvasBounds = pathContext.canvas.getBoundingClientRect();
-
-    timeLineContainerBounds  = {
-      x: 10,
-      y: overlayContext.canvas.height - 60,
-      width: overlayContext.canvas.width - 20,
-      height: 50
-    };
+    
+    // Build TImeline container
+    timeline = new Timeline({
+      ctx: overlayContext,
+      bounds: {
+        x: 0,
+        y: overlayContext.canvas.height - 60,
+        width: overlayContext.canvas.width,
+        height: 60
+      },
+      backgroundColor: 'rgba(0,0,0,0.2)'
+    });   
 
     //attache mouse event listeners
     overlayContext.canvas.onmousedown = handleMouseDown;
@@ -147,16 +118,27 @@ export const SimpleMap = function({
       mercatorpoint.y = (bounds.yMax - mercatorpoint.lat) * scale + padding;
     });
 
-    this.points = data;
+    //add path
+    path = new PathObj({
+      ctx: pathContext,
+      points: data,
+      pathWidth: 1,
+      pathColor: 'rgba(255,255,255,1)'      
+    })
 
   };
 
+  /**
+   * Draw initial rendering of path
+   */
   this.draw = () => {
     pathContext.clearRect(0,0,pathCanvas.width,pathCanvas.height);
-    drawPath();
-    
-    timeLineContainer = mapUtils.drawTimeline(pathContext, timeLineContainerBounds, pathWidth, pathColor);
-    mapUtils.drawStartIndicator(pathContext, startTimeIndicator, timeLineContainerBounds);
+    path.drawPath();
+
+    //draw timeline container  
+    timeline.updatePosition(0, path.points[0]);      
+    timeline.draw();
+
   }
 
 
