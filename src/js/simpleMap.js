@@ -1,6 +1,7 @@
 import {geoUtils} from './geoUtils.js';
 import {Timeline} from './timeline.js';
 import {PathObj} from './pathObj.js';
+import {clock} from './clock.js';
 
 export const SimpleMap = function({
   containerName = "mapContainer",
@@ -12,8 +13,7 @@ export const SimpleMap = function({
   backgroundColor,
   resize = false
 }) {
-  var mouseDown = false,
-      startTimeIndicator = 0,
+  var startTimeIndicator = 0,
       endTimeIndicator = 0,
       timelineIndicator = 0,
       canvasBounds,
@@ -22,7 +22,8 @@ export const SimpleMap = function({
       overlayCanvas = document.createElement("canvas"),
       overlayContext = overlayCanvas.getContext("2d"),
       pathContext = pathCanvas.getContext("2d"),
-      path;
+      path,
+      mouseDown = false;
 
 
   const handleMouseDown = (e) =>{    
@@ -88,7 +89,9 @@ export const SimpleMap = function({
         height: 60
       },
       backgroundColor: 'rgba(0,0,0,0.2)'
-    });   
+    });  
+    
+    clock.start();
 
     //attache mouse event listeners
     overlayContext.canvas.onmousedown = handleMouseDown;
@@ -132,11 +135,16 @@ export const SimpleMap = function({
    * Draw initial rendering of path
    */
   this.draw = () => {
+
     pathContext.clearRect(0,0,pathCanvas.width,pathCanvas.height);
+
+    //draw geojson path
     path.drawPath();
 
-    //draw timeline container  
-    timeline.updatePosition(0, path.points[0]);      
+    //set initial position and index
+    timeline.updatePosition(0, path.points[0]);  
+    
+    ///draw timeline container  
     timeline.draw();
 
   }

@@ -6327,6 +6327,5 @@ let rawData = [
         lon: e.lon/10000000
     }))
 
-    console.log('cleanData', cleanData)
       return cleanData;
   }
