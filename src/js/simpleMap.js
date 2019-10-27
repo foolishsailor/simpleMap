@@ -28,7 +28,8 @@ export const SimpleMap = function({
 
   const handleMouseDown = (e) =>{    
     mouseDown = true;
-    timeline.currentPosition = e.clientX-canvasBounds.left;
+    //timeline.currentPosition = e.clientX-canvasBounds.left;   
+    //timeline.updatePosition(e.clientX-canvasBounds.left, path.points[index]); 
   }
 
   const handleMouseUp = () =>{
@@ -44,10 +45,14 @@ export const SimpleMap = function({
   const handleMouseMove = (e) =>{ 
     if (mouseDown && e.clientX-canvasBounds.left >= timeline.bounds.x && e.clientX-canvasBounds.left <= timeline.bounds.width){
       //calc didstance to left or right as percentage of width to get the index of the path objects in path
-      let index = Math.floor(path.points.length * (e.clientX-canvasBounds.left)/timeline.bounds.width);
-      timeline.updatePosition(e.clientX-canvasBounds.left, path.points[index]);
-    }
+      let index = Math.floor(path.points.length * (e.clientX-canvasBounds.left-timeline.bounds.x)/(timeline.bounds.width-timeline.bounds.x));
+      
+      //set point to highlihg and move highlight
+      path.currentPoint = path.points[index];
 
+      //update poisition of sliders
+      timeline.updatePosition(e.clientX-canvasBounds.left-timeline.bounds.x);
+    }
   }
 
   
@@ -89,7 +94,7 @@ export const SimpleMap = function({
         height: 60
       },
       backgroundColor: 'rgba(0,0,0,0.2)'
-    });  
+    });     
     
     clock.start();
 
@@ -124,17 +129,18 @@ export const SimpleMap = function({
     //add path
     path = new PathObj({
       ctx: pathContext,
+      overlayCtx: overlayContext,
       points: data,
       pathWidth: 1,
       pathColor: 'rgba(255,255,255,1)'      
-    })
+    });    
 
   };
 
   /**
    * Draw initial rendering of path
    */
-  this.draw = () => {
+  this.loadMap = () => {
 
     pathContext.clearRect(0,0,pathCanvas.width,pathCanvas.height);
 
@@ -142,7 +148,10 @@ export const SimpleMap = function({
     path.drawPath();
 
     //set initial position and index
-    timeline.updatePosition(0, path.points[0]);  
+    timeline.updatePosition(0);  
+
+    //set point to highlihg and move highlight
+    path.currentPoint = path.points[0];
     
     ///draw timeline container  
     timeline.draw();

@@ -13,4 +13,4 @@ let newMap = new SimpleMap({
 newMap.buildMap();
 
 newMap.addData(parseD10Data(rawData).map(e => geoUtils.mercator(e.lat, e.lon)));
-newMap.draw();
+newMap.loadMap();
