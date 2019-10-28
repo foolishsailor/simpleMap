@@ -1,8 +1,8 @@
 .mapContainer{
     position: relative;
     margin: auto;
-    width: 700px;
-    height: 500px;
+    width: 1000px;
+    height: 700px;
     background: hsl(207, 61%, 20%);
 }
 

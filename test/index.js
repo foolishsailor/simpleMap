@@ -3,8 +3,8 @@ import {geoUtils} from '../src/js/geoUtils.js';
 
 let newMap = new SimpleMap({
     containerName: 'mapContainer',
-    height: 500,
-    width: 700,
+    height: 700,
+    width: 1000,
     padding: 30,
 });
 

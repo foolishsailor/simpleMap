@@ -4,7 +4,7 @@ export class Reticule {
     this.rotation = 0;
     this.orbitIncrement = 0;
     this._position = {};
-  }
+  }  
 
   /**
    * Update position of reticule.
@@ -15,7 +15,7 @@ export class Reticule {
    * @param {*} animate 
    */
   update(position, animate){
-
+ 
     //clear old position
     this.clearPathHighlight(this._position);
 

@@ -1,6 +1,6 @@
 import {geoUtils} from './geoUtils.js';
 import {Timeline} from './timeline.js';
-import {PathObj} from './pathObj.js';
+import {Path} from './Path.js';
 import {clock} from './clock.js';
 
 export const SimpleMap = function({
@@ -13,10 +13,7 @@ export const SimpleMap = function({
   backgroundColor,
   resize = false
 }) {
-  var startTimeIndicator = 0,
-      endTimeIndicator = 0,
-      timelineIndicator = 0,
-      canvasBounds,
+  var canvasBounds,
       timeline,     
       pathCanvas = document.createElement("canvas"),
       overlayCanvas = document.createElement("canvas"),
@@ -27,9 +24,7 @@ export const SimpleMap = function({
 
 
   const handleMouseDown = (e) =>{    
-    mouseDown = true;
-    //timeline.currentPosition = e.clientX-canvasBounds.left;   
-    //timeline.updatePosition(e.clientX-canvasBounds.left, path.points[index]); 
+    mouseDown = true
   }
 
   const handleMouseUp = () =>{
@@ -43,15 +38,18 @@ export const SimpleMap = function({
   }
 
   const handleMouseMove = (e) =>{ 
-    if (mouseDown && e.clientX-canvasBounds.left >= timeline.bounds.x && e.clientX-canvasBounds.left <= timeline.bounds.width){
-      //calc didstance to left or right as percentage of width to get the index of the path objects in path
-      let index = Math.floor(path.points.length * (e.clientX-canvasBounds.left-timeline.bounds.x)/(timeline.bounds.width-timeline.bounds.x));
+    if (mouseDown && e.clientX-canvasBounds.left >= timeline.bounds.x && e.clientX-canvasBounds.left < timeline.bounds.width){
       
-      //set point to highlihg and move highlight
-      path.currentPoint = path.points[index];
 
-      //update poisition of sliders
-      timeline.updatePosition(e.clientX-canvasBounds.left-timeline.bounds.x);
+      //update poisition of sliders and if slider is rang slider then update path highlight
+      if (timeline.interact({x:e.clientX-canvasBounds.left, y:e.clientY-canvasBounds.top})) {
+        //calc didstance to left or right as percentage of width to get the index of the path objects in path
+        let index = Math.floor(path.points.length * (e.clientX-canvasBounds.left-timeline.bounds.x)/(timeline.bounds.width-timeline.bounds.x));
+      
+        //set point to highlihg and move highlight
+        path.currentPoint = path.points[index];
+
+      }
     }
   }
 
@@ -127,7 +125,7 @@ export const SimpleMap = function({
     });
 
     //add path
-    path = new PathObj({
+    path = new Path({
       ctx: pathContext,
       overlayCtx: overlayContext,
       points: data,
@@ -147,15 +145,9 @@ export const SimpleMap = function({
     //draw geojson path
     path.drawPath();
 
-    //set initial position and index
-    timeline.updatePosition(0);  
-
     //set point to highlihg and move highlight
     path.currentPoint = path.points[0];
-    
-    ///draw timeline container  
-    timeline.draw();
-
+  
   }
 
 

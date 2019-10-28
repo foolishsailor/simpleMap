@@ -1,7 +1,7 @@
 import { clock } from "./clock.js";
 import { Reticule } from "./reticule.js";
 
-export class PathObj {
+export class Path {
   constructor({ ctx, overlayCtx, points, pathColor, pathWidth }) {
     this.ctx = ctx;
     this.overlayCtx = overlayCtx;
