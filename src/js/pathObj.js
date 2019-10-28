@@ -1,4 +1,5 @@
 import { clock } from "./clock.js";
+import { Reticule } from "./reticule.js";
 
 export class PathObj {
   constructor({ ctx, overlayCtx, points, pathColor, pathWidth }) {
@@ -6,14 +7,14 @@ export class PathObj {
     this.overlayCtx = overlayCtx;
     this.points = points;
     this.pathColor = pathColor;
-    this.pathWidth = pathWidth;
-    this.rotation = 0;
+    this.pathWidth = pathWidth;    
     this._currentPoint = {};
+    this.reticule = new Reticule(overlayCtx);
     this.init();
   }
 
   init() {
-    clock.subscribe("clock", this.drawPathHighlight.bind(this, true));
+    clock.subscribe("clock", this.animateReticule.bind(this, this._currentPoint, true));
   }
 
   /**
@@ -21,15 +22,17 @@ export class PathObj {
    * @param {{}} point
    */
   set currentPoint(point) {
-    //clear image at old position
-    this.clearPathHighlight();
-
     //update positon
     this._currentPoint = point;
 
     //draw new
-    this.drawPathHighlight();
+    this.reticule.update(this._currentPoint);
   }
+
+  animateReticule(){
+    this.reticule.update(this._currentPoint, true)
+  }
+  
 
   /**
    * draw path from geoJson points
@@ -52,109 +55,5 @@ export class PathObj {
     this.ctx.stroke();
   }
 
-  /**
-   * Draw highlihg indicator f current posiiton on path
-   */
-  drawPathHighlight(rotate) {
-    console.log("overlayctx", rotate);
-    //clear image at old position
-    this.clearPathHighlight();
-    this.overlayCtx.beginPath();
-    this.overlayCtx.fillStyle = "rgba(255,255,255,0.4)";
-    //center point
-    this.overlayCtx.arc(
-      this._currentPoint.x,
-      this._currentPoint.y,
-      5,
-      0,
-      2 * Math.PI
-    );
-    this.overlayCtx.fill();
-
-    this.overlayCtx.strokeStyle = "rgba(255,255,255,0.8)";
-    this.overlayCtx.lineWidth = 1;
-
-    //ring
-    this.overlayCtx.beginPath();
-    this.overlayCtx.arc(
-      this._currentPoint.x,
-      this._currentPoint.y,
-      30,
-      0,
-      2 * Math.PI
-    );
-    this.overlayCtx.stroke();
-
-    //partial top ring
-    this.overlayCtx.beginPath();
-    this.overlayCtx.arc(
-      this._currentPoint.x,
-      this._currentPoint.y,
-      35,
-      1.5 * Math.PI,
-      1.8 * Math.PI
-    );
-    this.overlayCtx.stroke();
-
-    //partial bottom ring
-    this.overlayCtx.beginPath();
-    this.overlayCtx.arc(
-      this._currentPoint.x,
-      this._currentPoint.y,
-      35,
-      0.5 * Math.PI,
-      0.8 * Math.PI
-    );
-    this.overlayCtx.stroke();
-
-    //animaged inner ring
-    //ring
-    if (rotate)
-      this.rotation >= 1 ? (this.rotation = 0) : (this.rotation += 0.05);
-
-    this.overlayCtx.strokeStyle = "rgba(255,131,0,0.4)";
-    this.overlayCtx.lineWidth = 4;
-    this.overlayCtx.beginPath();
-    this.overlayCtx.arc(
-      this._currentPoint.x,
-      this._currentPoint.y,
-      23,
-      0,
-      2 * Math.PI
-    );
-
-    this.overlayCtx.stroke();
-
-    this.overlayCtx.strokeStyle = "rgba(255,131,0,0.4)";
-    this.overlayCtx.lineWidth = 2;
-    this.overlayCtx.beginPath();
-    this.overlayCtx.arc(
-      this._currentPoint.x,
-      this._currentPoint.y,
-      23,
-      this.rotation * 2 * Math.PI,
-      (this.rotation + 0.25) * 2 * Math.PI
-    );
-
-    this.overlayCtx.stroke();
-
-    this.overlayCtx.beginPath();
-    this.overlayCtx.arc(
-      this._currentPoint.x,
-      this._currentPoint.y,
-      23,
-      (this.rotation + 0.5) * 2 * Math.PI,
-      (this.rotation + 0.75) * 2 * Math.PI
-    );
-    this.overlayCtx.stroke();
-  }
-
-  clearPathHighlight() {
-    this.overlayCtx.clearRect(
-      this._currentPoint.x - 40,
-      this._currentPoint.y - 40,
-      80,
-      80
-    );
-  }
+  
 }
