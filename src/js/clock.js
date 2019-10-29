@@ -3,8 +3,6 @@ const Clock = function() {
     _clock,
     _eventListeners = [];
 
-  console.log("trigger");
-
   //animation "tick"
   const _tick = () => {
     _emit("clock", {});

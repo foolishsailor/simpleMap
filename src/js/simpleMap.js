@@ -1,7 +1,7 @@
-import {geoUtils} from './geoUtils.js';
-import {Timeline} from './timeline.js';
-import {Path} from './Path.js';
-import {clock} from './clock.js';
+import { geoUtils } from "./geoUtils.js";
+import { Timeline } from "./timeline.js";
+import { Path } from "./Path.js";
+import { clock } from "./clock.js";
 
 export const SimpleMap = function({
   containerName = "mapContainer",
@@ -14,74 +14,97 @@ export const SimpleMap = function({
   resize = false
 }) {
   var canvasBounds,
-      timeline,     
-      pathCanvas = document.createElement("canvas"),
-      overlayCanvas = document.createElement("canvas"),
-      overlayContext = overlayCanvas.getContext("2d"),
-      pathContext = pathCanvas.getContext("2d"),
-      path,
-      mouseDown = false;
-
-
-  const handleMouseDown = (e) =>{    
-    mouseDown = true
-  }
-
-  const handleMouseUp = () =>{
+    timeline,
+    pathCanvas = document.createElement("canvas"),
+    overlayCanvas = document.createElement("canvas"),
+    overlayContext = overlayCanvas.getContext("2d"),
+    pathContext = pathCanvas.getContext("2d"),
+    path,
+    mouseDownPosition,
     mouseDown = false;
-    console.log('Mouse Up')
-  }
 
-  const handleMouseOut = () =>{
+  const handleMouseDown = e => {
+    mouseDown = true;
+    mouseDownPosition = {
+      x: e.clientX - canvasBounds.left,
+      y: e.clientY - canvasBounds.top
+    };
+    timeline.interact(mouseDownPosition);
+  };
+
+  const handleMouseUp = () => {
     mouseDown = false;
-    console.log('Mouse Out')
-  }
+    mouseDownPosition = {};
+    timeline.clearInteract();
+    console.log("Mouse Up");
+  };
 
-  const handleMouseMove = (e) =>{ 
-    if (mouseDown && e.clientX-canvasBounds.left >= timeline.bounds.x && e.clientX-canvasBounds.left < timeline.bounds.width){
-      
+  const handleMouseOut = () => {
+    mouseDown = false;
+    mouseDownPosition = {};
+    timeline.clearInteract();
+    console.log("Mouse Out");
+  };
 
-      //update poisition of sliders and if slider is rang slider then update path highlight
-      if (timeline.interact({x:e.clientX-canvasBounds.left, y:e.clientY-canvasBounds.top})) {
+  const handleMouseMove = e => {
+    if (mouseDown) {
+
+      //update position of sliders and if slider is range slider then update path highlight
+      if (timeline.rangeSliderSelected) {
+
         //calc didstance to left or right as percentage of width to get the index of the path objects in path
-        let index = Math.floor(path.points.length * (e.clientX-canvasBounds.left-timeline.bounds.x)/(timeline.bounds.width-timeline.bounds.x));
-      
+   
         //set point to highlihg and move highlight
-        path.currentPoint = path.points[index];
-
+        path.currentPoint =  Math.floor(
+          (path.points.length *
+            (e.clientX - canvasBounds.left - timeline.bounds.x)) /
+            (timeline.bounds.width)
+        );
+        
+       
       }
-    }
-  }
 
-  
+      timeline.draw({
+        x: e.clientX - canvasBounds.left,
+        y: e.clientY - canvasBounds.top
+      });
+    }
+  };
+
   /********************** PUBLIC METHODS *****************/
 
   /**
    *   Create canvas and attach to dom element
-   */  
+   */
+
   this.buildMap = () => {
-    pathCanvas.id = 'pathCanvas';
-    pathCanvas.setAttribute('z-index', 1);
-    overlayCanvas.id ='overlayCanvas';
-    overlayCanvas.setAttribute('z-index', 0);
-    
+    pathCanvas.id = "pathCanvas";
+    pathCanvas.setAttribute("z-index", 1);
+    overlayCanvas.id = "overlayCanvas";
+    overlayCanvas.setAttribute("z-index", 0);
+
     document.getElementById(containerName).appendChild(pathCanvas);
     document.getElementById(containerName).appendChild(overlayCanvas);
-    
+
     pathContext.canvas.height = height;
     pathContext.canvas.width = width;
 
     //background color or transparent
     if (typeof backgroundColor != "undefined") {
       pathContext.fillStyle = backgroundColor;
-      pathContext.fillRect(0, 0, pathContext.canvas.width, pathContext.canvas.height);
+      pathContext.fillRect(
+        0,
+        0,
+        pathContext.canvas.width,
+        pathContext.canvas.height
+      );
     }
 
     overlayContext.canvas.height = height;
     overlayContext.canvas.width = width;
 
     canvasBounds = pathContext.canvas.getBoundingClientRect();
-    
+
     // Build TImeline container
     timeline = new Timeline({
       ctx: overlayContext,
@@ -91,9 +114,9 @@ export const SimpleMap = function({
         width: overlayContext.canvas.width,
         height: 60
       },
-      backgroundColor: 'rgba(0,0,0,0.2)'
-    });     
-    
+      backgroundColor: "rgba(0,0,0,0.2)"
+    });
+
     clock.start();
 
     //attache mouse event listeners
@@ -101,7 +124,6 @@ export const SimpleMap = function({
     overlayContext.canvas.onmouseup = handleMouseUp;
     overlayContext.canvas.onmouseout = handleMouseOut;
     overlayContext.canvas.onmousemove = handleMouseMove;
-
   };
 
   /**
@@ -130,35 +152,31 @@ export const SimpleMap = function({
       overlayCtx: overlayContext,
       points: data,
       pathWidth: 1,
-      pathColor: 'rgba(255,255,255,1)'      
-    });    
-
+      pathColor: "rgba(255,255,255,1)"
+    });
   };
 
   /**
    * Draw initial rendering of path
    */
   this.loadMap = () => {
-
-    pathContext.clearRect(0,0,pathCanvas.width,pathCanvas.height);
+    pathContext.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
 
     //draw geojson path
     path.drawPath();
 
     //set point to highlihg and move highlight
-    path.currentPoint = path.points[0];
-  
-  }
-
+    path.currentPoint = 0;
+    
+  };
 
   /**
-   *   Clear canvas 
+   *   Clear canvas
    */
   this.eraseMap = () => {
     pathContext.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
     overlayContext.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
   };
-
 
   /**
    *   Remove canvas from DOM
@@ -171,13 +189,4 @@ export const SimpleMap = function({
       child.parentNode.removeChild(child);
     });
   };
-  
 };
-
-
-
-
-
-
-
-

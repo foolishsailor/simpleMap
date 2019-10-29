@@ -19,12 +19,13 @@ export class Path {
 
   /**
    * Set current object in path array to put highlihgt over and draw
-   * @param {{}} point
+   * @param {number} point
    */
-  set currentPoint(point) {
+  set currentPoint(index) {
     //update positon
-    this._currentPoint = point;
-
+    if (index >=0 && index <=this.points.length) {
+      this._currentPoint = this.points[index];
+    }
     //draw new
     this.reticule.update(this._currentPoint);
   }
