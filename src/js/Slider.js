@@ -39,6 +39,14 @@ export class Slider {
     return this.isMovable;
   }
 
+  get range(){
+    return this._range;
+  }
+
+  set range(range){
+    this._range = range;
+  }
+
   /**
    * Check if mouse down in object
    * @param {} position 
@@ -60,13 +68,16 @@ export class Slider {
 
 
   drawImage(position){ 
- 
-    console.log('position', this.range.min, position.x, this.range.max);
 
-    if (position.x >= this.range.min && position.x <= this.range.max){
-      if (this.isMovable) this.currentPosition.x = position.x - this.touchOffset;    
-    }    
-    
+    //checks if position to move slider exceeds slider range
+    //includes the touchOffset which is the diff between the object X and the touch X to keep
+    //the object tracking with mouse instead of obejct x locking to mouse X
+    if (position){
+      if (position.x - this.touchOffset >= this._range.min && position.x + this.touchOffset <= this._range.max){
+        if (this.isMovable) this.currentPosition.x = position.x - this.touchOffset;    
+      }    
+    }
+  
     this.ctx.drawImage(
       this.img,
       this.currentPosition.x,
@@ -89,7 +100,7 @@ export class RangeSlider extends Slider {
     this.width = 10;
     this.offset = Math.floor(this.width/2);
     this.img = new Image();
-    this.range = range;
+    this._range = range;
     this.init({src: imageSrc, initialPosition:initialPosition});
 
   }

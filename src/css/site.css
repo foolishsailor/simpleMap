@@ -2,7 +2,15 @@
     position: relative;
     margin: auto;
     width: 1000px;
-    height: 700px;
+    height: 500px;
+    background: hsl(207, 61%, 20%);
+}
+
+.timelineContainer {
+    position: relative;
+    margin: auto;
+    width: 1000px;
+    height: 60px;
     background: hsl(207, 61%, 20%);
 }
 

@@ -5,6 +5,7 @@ import { clock } from "./clock.js";
 
 export const SimpleMap = function({
   containerName = "mapContainer",
+  tinelineContainerName = "timelineContainer",
   height = 100,
   width = 100,
   padding = 10,
@@ -16,8 +17,8 @@ export const SimpleMap = function({
   var canvasBounds,
     timeline,
     pathCanvas = document.createElement("canvas"),
-    overlayCanvas = document.createElement("canvas"),
-    overlayContext = overlayCanvas.getContext("2d"),
+    pathOverlayCanvas = document.createElement("canvas"),
+    pathOverlayContext = pathOverlayCanvas.getContext("2d"),
     pathContext = pathCanvas.getContext("2d"),
     path,
     mouseDownPosition,
@@ -35,14 +36,12 @@ export const SimpleMap = function({
   const handleMouseUp = () => {
     mouseDown = false;
     mouseDownPosition = {};
-    timeline.clearInteract();
     console.log("Mouse Up");
   };
 
   const handleMouseOut = () => {
     mouseDown = false;
     mouseDownPosition = {};
-    timeline.clearInteract();
     console.log("Mouse Out");
   };
 
@@ -64,10 +63,6 @@ export const SimpleMap = function({
        
       }
 
-      timeline.draw({
-        x: e.clientX - canvasBounds.left,
-        y: e.clientY - canvasBounds.top
-      });
     }
   };
 
@@ -80,11 +75,11 @@ export const SimpleMap = function({
   this.buildMap = () => {
     pathCanvas.id = "pathCanvas";
     pathCanvas.setAttribute("z-index", 1);
-    overlayCanvas.id = "overlayCanvas";
-    overlayCanvas.setAttribute("z-index", 0);
+    pathOverlayCanvas.id = "pathOverlayCanvas";
+    pathOverlayCanvas.setAttribute("z-index", 0);
 
     document.getElementById(containerName).appendChild(pathCanvas);
-    document.getElementById(containerName).appendChild(overlayCanvas);
+    document.getElementById(containerName).appendChild(pathOverlayCanvas);
 
     pathContext.canvas.height = height;
     pathContext.canvas.width = width;
@@ -100,18 +95,18 @@ export const SimpleMap = function({
       );
     }
 
-    overlayContext.canvas.height = height;
-    overlayContext.canvas.width = width;
+    pathOverlayContext.canvas.height = height;
+    pathOverlayContext.canvas.width = width;
 
     canvasBounds = pathContext.canvas.getBoundingClientRect();
 
     // Build TImeline container
     timeline = new Timeline({
-      ctx: overlayContext,
+      container: tinelineContainerName,
       bounds: {
         x: 0,
-        y: overlayContext.canvas.height - 60,
-        width: overlayContext.canvas.width,
+        y: 0,
+        width: pathOverlayContext.canvas.width,
         height: 60
       },
       backgroundColor: "rgba(0,0,0,0.2)"
@@ -120,10 +115,10 @@ export const SimpleMap = function({
     clock.start();
 
     //attache mouse event listeners
-    overlayContext.canvas.onmousedown = handleMouseDown;
-    overlayContext.canvas.onmouseup = handleMouseUp;
-    overlayContext.canvas.onmouseout = handleMouseOut;
-    overlayContext.canvas.onmousemove = handleMouseMove;
+    pathOverlayContext.canvas.onmousedown = handleMouseDown;
+    pathOverlayContext.canvas.onmouseup = handleMouseUp;
+    pathOverlayContext.canvas.onmouseout = handleMouseOut;
+    pathOverlayContext.canvas.onmousemove = handleMouseMove;
   };
 
   /**
@@ -149,11 +144,13 @@ export const SimpleMap = function({
     //add path
     path = new Path({
       ctx: pathContext,
-      overlayCtx: overlayContext,
+      overlayCtx: pathOverlayContext,
       points: data,
       pathWidth: 1,
       pathColor: "rgba(255,255,255,1)"
     });
+
+    timeline.path = path;
   };
 
   /**
@@ -175,7 +172,7 @@ export const SimpleMap = function({
    */
   this.eraseMap = () => {
     pathContext.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
-    overlayContext.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
+    pathOverlayContext.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
   };
 
   /**

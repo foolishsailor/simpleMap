@@ -3,7 +3,8 @@ import {geoUtils} from '../src/js/geoUtils.js';
 
 let newMap = new SimpleMap({
     containerName: 'mapContainer',
-    height: 700,
+    tinelineContainerName: 'timelineContainer',
+    height: 500,
     width: 1000,
     padding: 30,
 });
