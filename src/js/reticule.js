@@ -14,16 +14,16 @@ export class Reticule {
    * @param {*} position 
    * @param {*} animate 
    */
-  update(position, animate){
+  update(point, animate){
  
     //clear old position
     this.clearPathHighlight(this._position);
 
     //update position
-    this._position = position;
+    this._position = point.position;
 
     //draw new position
-    this.draw(position, animate);
+    this.draw(point.position, animate);
   }
 
   orbit(orbitRadius, increment) {

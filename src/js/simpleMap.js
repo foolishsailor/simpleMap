@@ -3,11 +3,12 @@ import { Timeline } from "./timeline.js";
 import { Path } from "./Path.js";
 import { clock } from "./clock.js";
 
+
 export const SimpleMap = function({
   containerName = "mapContainer",
-  tinelineContainerName = "timelineContainer",
-  height = 100,
-  width = 100,
+  tinelineContainerName = "timelineContainer",  
+  height = 500,
+  width = 1000,
   padding = 10,
   pathColor = "white",
   pathWidth = 2,
@@ -19,7 +20,7 @@ export const SimpleMap = function({
     pathCanvas = document.createElement("canvas"),
     pathOverlayCanvas = document.createElement("canvas"),
     pathOverlayContext = pathOverlayCanvas.getContext("2d"),
-    pathContext = pathCanvas.getContext("2d"),
+    pathContext = pathCanvas.getContext("2d"),    
     path,
     mouseDownPosition,
     mouseDown = false;
@@ -81,8 +82,10 @@ export const SimpleMap = function({
     document.getElementById(containerName).appendChild(pathCanvas);
     document.getElementById(containerName).appendChild(pathOverlayCanvas);
 
+ 
+    console.log('width', width)
     pathContext.canvas.height = height;
-    pathContext.canvas.width = width;
+    pathContext.canvas.width =  width;
 
     //background color or transparent
     if (typeof backgroundColor != "undefined") {
@@ -95,8 +98,8 @@ export const SimpleMap = function({
       );
     }
 
-    pathOverlayContext.canvas.height = height;
-    pathOverlayContext.canvas.width = width;
+    pathOverlayContext.canvas.height = pathContext.canvas.height;
+    pathOverlayContext.canvas.width = pathContext.canvas.width;
 
     canvasBounds = pathContext.canvas.getBoundingClientRect();
 
@@ -126,9 +129,8 @@ export const SimpleMap = function({
    */
   this.addData = data => {
     var bounds, xScale, yScale, scale;
-
     //get bounds of data using mercator projection data
-    bounds = geoUtils.getBoundingBox(data);
+    bounds = geoUtils.getBoundingBox(data.map(e => e.position));
 
     // Determine how much to scale our coordinates by
     xScale = (width - padding * 2) / Math.abs(bounds.xMax - bounds.xMin);
@@ -137,8 +139,8 @@ export const SimpleMap = function({
 
     //apply scale and padding to each point
     data.forEach(mercatorpoint => {
-      mercatorpoint.x = (mercatorpoint.lon - bounds.xMin) * scale + padding;
-      mercatorpoint.y = (bounds.yMax - mercatorpoint.lat) * scale + padding;
+      mercatorpoint.position.x = (mercatorpoint.position.lon - bounds.xMin) * scale + padding;
+      mercatorpoint.position.y = (bounds.yMax - mercatorpoint.position.lat) * scale + padding;
     });
 
     //add path

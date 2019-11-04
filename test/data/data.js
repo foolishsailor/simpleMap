@@ -6321,11 +6321,4 @@ let rawData = [
     }
   ];
 
-  function parseD10Data(data){
-    let cleanData = data.map(e => ({
-        lat: e.lat/10000000,
-        lon: e.lon/10000000
-    }))
-
-      return cleanData;
-  }
+ 

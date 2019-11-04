@@ -1,4 +1,5 @@
 import { RangeSlider } from "./Slider.js";
+import { geoUtils } from "./geoUtils.js";
 
 export class Timeline {
   constructor({ bounds, backgroundColor, container }) {
@@ -7,6 +8,7 @@ export class Timeline {
     this.mouseDownPosition = {};
     this._bounds = bounds;
     this.currentPath;
+    this.increments;
     this.backgroundColor = backgroundColor;
     this._slideBounds;
     this.rangeSlider;
@@ -60,9 +62,9 @@ export class Timeline {
     //set data sliderArea
     this._slideBounds = {
       x: this._bounds.x + 20,
-      y: this._bounds.y + 5,
+      y: this._bounds.y + 15,
       width: this._bounds.width - 40,
-      height: this._bounds.height - 10
+      height: this._bounds.height - 15
     };
 
     this.rangeSlider = new RangeSlider({
@@ -103,6 +105,7 @@ export class Timeline {
 
     //draw timeline container
     this.drawContainer();
+
   }
 
   /**
@@ -122,6 +125,10 @@ export class Timeline {
 
   set path(path){
     this.currentPath = path;
+    
+    //draw time increments
+    this.drawTimeIncrements(); 
+
   }
 
 
@@ -144,6 +151,9 @@ export class Timeline {
   }
 
   handleMouseOut() {
+    this.mouseDown = false;
+    this.mouseDownPosition = {};
+    this.clearInteract();
     console.log("Mouse Out");
   }
 
@@ -192,15 +202,19 @@ export class Timeline {
   draw(currentPosition) {
     //draw timeline container
     this.drawContainer();  
+
+    this.drawTimeIncrements();
     
+    
+    this.startSlider.drawImage(currentPosition);
+    this.rangeSlider.drawImage(currentPosition);    
+    this.endSlider.drawImage(currentPosition);
+
     //updateranges
     this.startSlider.range = {min: this._slideBounds.x - 10, max: this.rangeSlider.position.x - (this.startSlider.width/2)}
     this.rangeSlider.range = {min: this.startSlider.position.x + this.rangeSlider.width,  max: this.endSlider.position.x}
     this.endSlider.range = {min: this.rangeSlider.position.x + (this.endSlider.width), max: this._slideBounds.width + this._slideBounds.x + 10}
 
-    this.startSlider.drawImage(currentPosition);
-    this.rangeSlider.drawImage(currentPosition);    
-    this.endSlider.drawImage(currentPosition);
 
     //limit range of path to range of range slider
     if (this.rangeSliderSelected && 
@@ -209,8 +223,8 @@ export class Timeline {
       //set point to highlihg and move highlight
       this.currentPath.currentPoint = Math.floor(
         (this.currentPath.points.length *
-          (currentPosition.x - this._bounds.x)) /
-          this._bounds.width
+          (currentPosition.x - this._slideBounds.x)) /
+          this._slideBounds.width
       );
     }
 
@@ -245,4 +259,31 @@ export class Timeline {
       this._slideBounds.height
     );
   }
+
+  /**
+   * Draw time increments
+   */
+  drawTimeIncrements(qty){
+
+    qty=25;
+
+    let timeDiff = new Date(this.currentPath.points[this.currentPath.points.length-1].data.timeStamp) - new Date(this.currentPath.points[0].data.timeStamp),
+        increment = (this._slideBounds.width - this.rangeSlider.width) /qty;
+
+    this.timelineContext.font = "8px Arial";
+    this.timelineContext.textAlign = "center";
+    this.timelineContext.fillStyle = "rgba(255,255,255,0.8)";
+    this.timelineContext.strokeStyle = "rgba(255,255,255,0.3)";
+    
+    for (var i=0, x=0; i<=qty; i++, x+=increment ){
+      this.timelineContext.beginPath();
+      this.timelineContext.fillText(geoUtils.timeConversion(timeDiff/qty*i), this._slideBounds.x + (this.rangeSlider.width/2) + x,10)
+      this.timelineContext.moveTo(this._slideBounds.x + (this.rangeSlider.width/2) + x, this._slideBounds.y);
+      this.timelineContext.lineTo(this._slideBounds.x + (this.rangeSlider.width/2) + x, this._slideBounds.y + this._slideBounds.height);
+      this.timelineContext.stroke();
+    }
+    
+  }
+
+  
 }

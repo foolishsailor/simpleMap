@@ -1,17 +1,23 @@
 .mapContainer{
-    position: relative;
-    margin: auto;
-    width: 1000px;
+    position: relative;   
+    width: 800px;
     height: 500px;
     background: hsl(207, 61%, 20%);
 }
 
 .timelineContainer {
-    position: relative;
-    margin: auto;
-    width: 1000px;
-    height: 60px;
+    position: relative;    
+    width: 800px;
+    height: 70px;
     background: hsl(207, 61%, 20%);
+}
+
+.dataContainer {
+    position: relative;
+    width: 200px;
+    height: 570px;
+    background: #333;
+
 }
 
 canvas { position: absolute; }
